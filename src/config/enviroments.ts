@@ -13,9 +13,10 @@ export const envSchema = z.object({
 const { success, data, error } = envSchema.safeParse(process.env);
 
 if (!success) {
-  console.error(error);
-  process.exit(1);
+  console.error("Error en la configuración de las variables de entorno:", error.format());
+  process.exit(1)
 }
+
 
 export const {
   PORT,

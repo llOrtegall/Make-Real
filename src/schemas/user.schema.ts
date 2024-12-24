@@ -25,7 +25,7 @@ const UserSchema = zod.object({
   }),
 })
 
-export function validateUser(data: zod.infer<typeof UserSchema>) {
+export function validateUser(data: unknown) {
   const user = UserSchema.safeParse(data)
   return user
 }

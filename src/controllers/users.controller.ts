@@ -4,22 +4,20 @@ import { validateUser } from '../schemas/user.schema'
 import { ErrorMySQL } from '../types/mysql'
 
 export async function createUser(req: Request, res: Response) {
-  const userValidate = validateUser(req.body)
+  const { success, data, error } = validateUser(req.body)
 
-  if (userValidate.error) {
-    return res.status(400).json({
-      message: userValidate.error
-    })
+  if (!success) {
+    return res.status(400).json({ message: error.format() })
   }
 
   try {
-    const result = await createUserService(userValidate.data)
+    const result = await createUserService(data)
     if (result.affectedRows === 1) {
       return res.status(201).json({ message: 'Usuario creado correctamente' })
     } else if (result.affectedRows === 0) {
       return res.status(500).json({ message: 'Error al crear el usuario' })
     }
-    
+
   } catch (error) {
     const err = error as ErrorMySQL
     if (err.code === 'ER_DUP_ENTRY') {
@@ -42,8 +40,8 @@ export async function getUsers(_req: Request, res: Response) {
 
 export async function getUserByDoc(req: Request, res: Response) {
   const documento = req.params.documento
-  
-  if (documento === undefined || documento === null) { 
+
+  if (documento === undefined || documento === null) {
     return res.status(400).json({ message: 'El parametro documento es requerido' })
   }
 
@@ -52,7 +50,7 @@ export async function getUserByDoc(req: Request, res: Response) {
     if (!result) {
       return res.status(404).json({ message: 'Usuario no encontrado' })
     }
-    
+
     const { apellidos, nombres, correo, documento: cedula, telefono } = result[0]
 
     return res.status(200).json({
@@ -105,15 +103,15 @@ export async function deleteUserByDoc(req: Request, res: Response) {
   try {
     const result = await deleteServiceByDoc(documento)
     console.log(result);
-    
+
     if (result.affectedRows === 1) {
       return res.status(200).json({ message: 'Usuario eliminado correctamente' })
-    } else if (result.affectedRows === 0){
+    } else if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Usuario no encontrado' })
     }
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: 'Error al eliminar el usuario' })
   }
-  
+
 }
